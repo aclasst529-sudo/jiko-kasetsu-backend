@@ -1,0 +1,11 @@
+name = "jiko-kasetsu-api"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "jiko-kasetsu-db"
+database_id = "ここにIDを貼る"
+
+[triggers]
+crons = ["0 0 1 * *"]
