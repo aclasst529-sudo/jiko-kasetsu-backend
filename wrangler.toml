@@ -5,7 +5,7 @@ compatibility_date = "2026-09-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "jiko-kasetsu-db"
-database_id = "ここにIDを貼る"
+database_id = "73d64a86-265c-49b1-bd03-c71ae1de5d4b"
 
 [triggers]
 crons = ["0 0 1 * *"]
