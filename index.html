@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>自己仮説</title>
+<style>
+:root{
+  --bg:#F2EEE7; --ink:#1C1815; --sub:#6E665D; --line:#DDD5C8;
+  --accent:#8C2F2B; --card:#FFFDF9; --accent-soft:#F6E4DE;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15120F; --ink:#EFE9E0; --sub:#A79E92; --line:#332C25;
+    --accent:#D9776E; --card:#1D1916; --accent-soft:#2C1B18;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15120F; --ink:#EFE9E0; --sub:#A79E92; --line:#332C25;
+  --accent:#D9776E; --card:#1D1916; --accent-soft:#2C1B18;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans JP",sans-serif;
+  min-height:100%;line-height:1.7;}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+.wrap{max-width:560px;margin:0 auto;padding:32px 20px 60px;}
+h1{font-family:"Noto Serif JP",serif;font-weight:700;font-size:28px;letter-spacing:.04em;margin:0 0 6px;}
+.lede{color:var(--sub);font-size:14px;margin:0 0 28px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:26px 22px;margin-bottom:16px;}
+.btn{display:inline-block;background:var(--ink);color:var(--bg);border:none;border-radius:2px;
+  padding:13px 22px;font-size:15px;font-family:inherit;cursor:pointer;width:100%;text-align:center;}
+.btn:active{opacity:.85;}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
+.opt{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);
+  border-radius:2px;padding:14px 16px;margin-bottom:10px;font-size:15px;font-family:inherit;color:var(--ink);cursor:pointer;}
+.opt:active,.opt.sel{border-color:var(--accent);background:var(--accent-soft);}
+.opt.none{color:var(--sub);font-size:13px;border-style:dashed;}
+.qhead{color:var(--sub);font-size:12px;margin-bottom:10px;}
+.qtext{font-size:17px;margin-bottom:20px;}
+.bar{height:3px;background:var(--line);border-radius:2px;margin-bottom:24px;overflow:hidden;}
+.bar>i{display:block;height:100%;background:var(--accent);transition:width .3s;}
+.type-code{font-family:"Noto Serif JP",serif;font-size:44px;font-weight:700;letter-spacing:.06em;
+  color:var(--accent);margin:6px 0 4px;}
+.axisrow{margin:16px 0;}
+.axislabel{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;margin-bottom:6px;}
+.axistrack{height:8px;background:var(--line);border-radius:4px;position:relative;}
+.axisdot{position:absolute;top:-3px;width:14px;height:14px;border-radius:50%;background:var(--accent);}
+.hidden{display:none;}
+.foot{color:var(--sub);font-size:12px;margin-top:30px;line-height:1.8;}
+.pillrow{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+.pill{font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:20px;padding:3px 10px;}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+const Q = [
+["A","忙しい一週間の後、心から回復できるのはどちらに近い?",["誰にも会わず、一人の時間で回復する","信頼できる相手と過ごして回復する"]],
+["A","疲れた時、頭に浮かぶのは?",["静かな場所に行きたい","誰かに話を聞いてほしい"]],
+["A","休日の理想の過ごし方に近いのは?",["予定を入れず自分のペースで過ごす","誰かと予定を合わせて過ごす"]],
+["A","新しい環境に入った初日、エネルギーを使うのは?",["人に合わせて振る舞うこと","一人で状況を把握すること"]],
+["A","長時間人と話した後の感覚に近いのは?",["少し消耗した感じがする","むしろ元気になった感じがする"]],
+["A","作業がはかどるのはどちらの環境?",["静かな一人の空間","誰かの気配がある空間"]],
+["A","気分が落ち込んだ時にまずすることは?",["一人で考えをまとめる","誰かに話して整理する"]],
+["A","旅行するならどちらが楽しい?",["一人で気ままに回る","誰かと感想を共有しながら回る"]],
+["A","集中したい作業がある時は?",["一人になれる場所を探す","人がいる場所でもあまり気にならない"]],
+["A","理想の休憩時間の過ごし方は?",["スマホも置いてぼーっとする","誰かとメッセージのやり取りをする"]],
+["A","悩みごとがある時、最初にすることは?",["自分の中で答えを出そうとする","誰かに聞いてもらいたくなる"]],
+["A","刺激的な一日を過ごした夜は?",["静かに一人で余韻に浸りたい","誰かとその日について話したい"]],
+["A","エネルギーが切れかけている時に効くのは?",["何も予定のない時間","気の合う人との会話"]],
+["A","長期休暇の理想の使い方は?",["一人で好きなことに没頭する","人と会う予定を詰め込む"]],
+["A","初対面の人が多い場に呼ばれたら?",["できれば人数が少ない場を選ぶ","誰かいれば賑やかな場でも構わない"]],
+["B","仕事や作業の出来を自分で判断する基準は?",["自分の中の基準を満たしたかどうか","周りからどう評価されたかどうか"]],
+["B","褒められた時、素直に受け取れる方だと思う?",["理由が分かれば納得して受け取れる","嬉しいがどこか信じきれない時がある"]],
+["B","何かを決める時、最後の決め手になりやすいのは?",["自分がどう思うか","周りがどう見るか"]],
+["B","評価されない環境でもモチベーションは保てる方?",["保てる、自分の納得が大事","少し保ちにくい"]],
+["B","SNSの反応に対する感覚に近いのは?",["あまり気にならない","気になってしまう方だと思う"]],
+["B","誰かに指摘された時、まず考えるのは?",["自分自身がどう思うか","相手にどう見られたか"]],
+["B","服や持ち物を選ぶ基準に近いのは?",["自分が気に入るかどうか","周りにどう見られるか"]],
+["B","目標を達成した時、一番満たされるのは?",["自分の中の納得感","誰かに認められたという実感"]],
+["B","失敗した時、まず気になるのは?",["自分の中でどう消化するか","周りにどう思われたか"]],
+["B","人からの評価を聞く前に、自分の出来は分かる方?",["だいたい自分で分かる","人の反応を聞いて初めて分かる"]],
+["B","意見が対立した時に優先しやすいのは?",["自分の考えの筋が通っているか","相手との関係が保てるか"]],
+["B","頑張った結果を誰にも気づかれなかったら?",["それでも自分の中で納得できる","少し物足りなさを感じる"]],
+["B","昔の自分を振り返る時の基準は?",["自分がどう成長したか","周りからどう見られていたか"]],
+["B","何かを選ぶ時、人の意見を聞く前に自分の答えを決めている方?",["決めている方だと思う","人の意見を聞いてから決める方だと思う"]],
+["B","努力を続けられる一番の理由に近いのは?",["自分自身が納得したいから","誰かに認めてほしいから"]],
+["C","結論の出ない話し合いが続くと?",["早く結論を出したくなる","結論が出なくても特に困らない"],["むしろその過程自体を面白がれる"]],
+["C","予定が急に変わった時の反応に近いのは?",["早めに新しい予定をはっきりさせたい","変わったなりに成り行きに任せる"],["変化自体を楽しめる"]],
+["C","白黒つけにくい状況に置かれると?",["どちらかにはっきりさせたくなる","はっきりしないままでも進められる"],["曖昧さそのものが面白いと感じる"]],
+["C","答えのない問いを考える時間は?",["早めに自分なりの結論を出したい","考え続けること自体は苦にならない"],["答えが出ないこと自体を楽しめる"]],
+["C","複数の選択肢で迷った時は?",["早めにどちらかに決めたい","決めずに様子を見ることができる"],["迷っている状態自体を楽しめる"]],
+["C","人の意見が真っ二つに割れた場面では?",["どちらが正しいか判断したくなる","両方の立場をそのまま受け止められる"],["対立自体を面白い現象として見られる"]],
+["C","将来の予定が未定のままだと?",["少し落ち着かない","特に気にならない"],["未定であること自体にワクワクする"]],
+["C","相反する情報に触れた時は?",["どちらが正しいか調べたくなる","両方をそのまま保留しておける"],["矛盾している状態そのものが面白い"]],
+["C","締め切りのない課題を渡されたら?",["自分で期限を決めたくなる","期限がなくても特に困らない"],["期限がないこと自体を楽しめる"]],
+["C","二つの意見のどちらも一理あると感じたら?",["どちらか一方を選びたくなる","両方を並べたまま置いておける"],["矛盾を抱えたままでいることが心地いい"]],
+["C","計画が崩れて先が読めなくなったら?",["早く立て直したい","崩れたなりに進めていける"],["読めない状況自体が面白い"]],
+["C","誰かに「結局どっちなの」と聞かれたら?",["すぐに答えを出したい","保留のままでも答えられる"],["「どちらでもある」と答えたくなる"]],
+["C","はっきりしない人間関係の距離感は?",["早くはっきりさせたい","曖昧なままでも付き合える"],["曖昧な距離感自体を楽しめる"]],
+["C","正解が一つに決まらない議論は?",["居心地が悪く感じる","特に気にならない"],["一番面白いと感じる"]],
+["C","占いや診断の結果に矛盾があったら?",["どちらが正しいか気になる","そのまま両方受け止められる"],["矛盾している方が面白いと感じる"]],
+["C","自分の中で意見が変わり続ける時は?",["早く一つにまとめたい","変わり続けてもあまり困らない"],["変わり続けること自体が楽しい"]],
+["C","結論を急かされる場面が続くと?",["結論を出せてむしろ安心する","急かされること自体に疲れる"],["急かされてもマイペースに保留できる"]],
+["C","ルールが明文化されていない集まりは?",["少し落ち着かない","慣れれば特に問題ない"],["ルールがない方が面白いと感じる"]],
+["C","自分の性格を一言で説明してと言われたら?",["一言でまとめたい","一言では難しいと感じる"],["一言でまとまらないことが自分らしいと思う"]],
+["C","矛盾した二つの感情を同時に抱いたら?",["どちらかを優先して整理したい","両方あるままにしておける"],["矛盾している自分を面白がれる"]],
+["D","新しい挑戦の話が来た時、最初に考えるのは?",["リスクや失敗した時のこと","得られるものや面白さ"]],
+["D","知らない土地への旅行は?",["下調べをしっかりしてから行きたい","行ってから考える方が楽しい"]],
+["D","お金の使い方の傾向に近いのは?",["堅実に管理する方","使いどころにはあまり迷わない方"]],
+["D","新しい環境に変わることについては?",["できれば安定した環境を保ちたい","変化があった方がむしろ楽しい"]],
+["D","未経験のことに誘われたら?",["まず不安要素を確認したくなる","とりあえずやってみたくなる"]],
+["D","将来の計画の立て方は?",["リスクを避けた堅実な計画を好む","多少のリスクは織り込んで攻める計画を好む"]],
+["D","初めての店や商品を選ぶ時は?",["評判を調べてから選ぶ","直感で選んでみることが多い"]],
+["D","大きな決断をする時に重視するのは?",["失敗しない確実さ","得られる可能性の大きさ"]],
+["D","仕事や作業で新しいやり方を試すことについては?",["実績のあるやり方を優先したい","新しいやり方を積極的に試したい"]],
+["D","予定のない自由な一日ができたら?",["だいたい過ごし方を決めておきたい","その場のノリで決めたい"]],
+];
+const NONE = "いずれも当てはまらない";
+const TYPES = {
+"0-0-0":"型-07","0-0-1":"型-19","0-0-2":"型-03","0-1-0":"型-22","0-1-1":"型-11","0-1-2":"型-28",
+"1-0-0":"型-15","1-0-1":"型-04","1-0-2":"型-31","1-1-0":"型-09","1-1-1":"型-26","1-1-2":"型-17"
+};
+const API_BASE = "https://jiko-kasetsu-backend.aclasst529.workers.dev";
+function getSessionId(){
+  let sid = localStorage.getItem("jikokasetsu_sid");
+  if(!sid){ sid = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random()); localStorage.setItem("jikokasetsu_sid", sid); }
+  return sid;
+}
+async function postJSON(path, body){
+  if(!API_BASE) return;
+  try{
+    await fetch(API_BASE + path, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+  }catch(e){}
+}
+const KEY = "jikokasetsu_v1";
+function loadState(){
+  try{ const s = JSON.parse(localStorage.getItem(KEY)); if(s) return s; }catch(e){}
+  const order = [...Array(Q.length).keys()];
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  return {order, answers:{}, pos:0};
+}
+function saveState(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+let state = loadState();
+
+function render(){
+  const app = document.getElementById('app');
+  const total = Q.length;
+  const answered = Object.keys(state.answers).length;
+  if(answered >= total){ renderResult(app); return; }
+  if(state.pos % 10 === 0 && Object.keys(state.answers).length === state.pos){
+    renderSessionGate(app);
+    return;
+  }
+  renderQuestion(app);
+}
+
+function renderSessionGate(app){
+  const session = Math.floor(state.pos/10)+1;
+  app.innerHTML = `
+    <h1>自己仮説</h1>
+    <p class="lede">言語化されていなかった自分の傾向に、状況判断を通じて近づく仮説ツール。</p>
+    <div class="pillrow"><span class="pill">全60問</span><span class="pill">10問 × 6セッション</span><span class="pill">結果は自分だけ閲覧可</span></div>
+    ${state.pos===0 ? '<p class="foot" style="margin-bottom:16px;"><a href="#" onclick="testConnection(event)" style="color:var(--accent);">接続テストを送信する(動作確認用)</a> <span id="testresult"></span></p>' : ''}
+    <div class="card">
+      <div class="qhead">セッション ${session} / 6</div>
+      <p class="qtext" style="margin-bottom:14px;">${state.pos===0 ? "直感で、深く考えすぎずに答えてください。途中で閉じても、続きから再開できます。" : "続きから再開します。"}</p>
+      <button class="btn" onclick="startSession()">この10問を始める</button>
+    </div>
+    <p class="foot">これは検証段階の仮説的な診断です。精度は今後の回答フィードバックによって更新されていく予定で、断定的な結果ではありません。</p>
+  `;
+}
+async function testConnection(e){
+  e.preventDefault();
+  const el = document.getElementById('testresult');
+  el.textContent = '送信中...';
+  if(!API_BASE){ el.textContent = 'API_BASE未設定'; return; }
+  try{
+    const res = await fetch(API_BASE + "/submit", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        session_id: getSessionId(), type_code: "TEST",
+        axis_bin:{A:0,B:0,C:0,D:0},
+        scores:{A:[1,0],B:[1,0],C:[1,0,0],D:[1,0]}
+      })
+    });
+    el.textContent = res.ok ? '成功しました' : ('失敗: ' + res.status);
+  }catch(err){ el.textContent = '通信エラー: ' + err; }
+}
+function startSession(){ render2(); }
+function render2(){ renderQuestionForce(); }
+function renderQuestionForce(){ renderQuestion(document.getElementById('app')); }
+
+function renderQuestion(app){
+  const idx = state.order[state.pos];
+  const [axis, text, opts] = Q[idx];
+  const options = opts ? opts.slice() : [];
+  const total = Q.length;
+  app.innerHTML = `
+    <div class="bar"><i style="width:${(state.pos/total*100).toFixed(1)}%"></i></div>
+    <div class="qhead">質問 ${state.pos+1} / ${total}</div>
+    <div class="card">
+      <p class="qtext">${text}</p>
+      <div id="opts"></div>
+    </div>
+  `;
+  const optsEl = app.querySelector('#opts');
+  options.forEach((label, i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt'; b.textContent = label;
+    b.onclick = ()=> answer(idx, axis, i);
+    optsEl.appendChild(b);
+  });
+  const noneBtn = document.createElement('button');
+  noneBtn.className = 'opt none'; noneBtn.textContent = NONE;
+  noneBtn.onclick = ()=> answer(idx, axis, null);
+  optsEl.appendChild(noneBtn);
+}
+
+function answer(idx, axis, value){
+  state.answers[idx] = {axis, value};
+  state.pos += 1;
+  saveState(state);
+  render();
+}
+
+function computeScores(){
+  const sums = {A:[0,0], B:[0,0], C:[0,0,0], D:[0,0]};
+  Q.forEach((q, idx)=>{
+    const a = state.answers[idx];
+    if(!a || a.value===null) return;
+    if(a.axis==="C") sums.C[a.value]++;
+    else sums[a.axis][a.value]++;
+  });
+  return sums;
+}
+
+function renderResult(app){
+  const s = computeScores();
+  const aTotal = s.A[0]+s.A[1] || 1;
+  const bTotal = s.B[0]+s.B[1] || 1;
+  const cTotal = s.C[0]+s.C[1]+s.C[2] || 1;
+  const dTotal = s.D[0]+s.D[1] || 1;
+
+  const aBin = s.A[1]/aTotal >= 0.5 ? 1 : 0;
+  const bBin = s.B[1]/bTotal >= 0.5 ? 1 : 0;
+  const cVals=[s.C[0]/cTotal, s.C[1]/cTotal, s.C[2]/cTotal];
+  const cBin = cVals.indexOf(Math.max(...cVals));
+  const dBin = s.D[1]/dTotal >= 0.5 ? 1 : 0;
+
+  const code = TYPES[`${aBin}-${bBin}-${cBin}`];
+
+  if(!state.submitted){
+    state.submitted = true; saveState(state);
+    postJSON("/submit", {
+      session_id: getSessionId(), type_code: code,
+      axis_bin: {A:aBin, B:bBin, C:cBin, D:dBin}, scores: s
+    });
+  }
+
+  app.innerHTML = `
+    <div class="qhead">診断結果 &middot; 非公開</div>
+    <div class="card" style="text-align:center;">
+      <div class="type-code">${code}</div>
+      <p style="color:var(--sub);font-size:13px;">この記号の意味は公式には定義されていません。</p>
+    </div>
+    <div class="card">
+      <p style="font-size:14px;margin-bottom:4px;">傾向の内訳(この結果はあなたのみが見ています)</p>
+      ${axisBar("エネルギーの回復", s.A[0]/aTotal, "一人で回復", "誰かといて回復")}
+      ${axisBar("納得の基準", s.B[0]/bTotal, "自分基準", "他者評価基準")}
+      ${axisBarC(cVals)}
+    </div>
+    <div class="card">
+      <p style="font-size:14px;">同じ記号の人でも、細かなスコアは人によって異なります。相性の出方が人によって違って見えるのはそのためです。</p>
+    </div>
+    <div class="card" id="fbcard">
+      <p style="font-size:14px;margin-bottom:12px;">この結果、実際の自分と近いと感じますか?(この回答が今後の精度向上に使われます)</p>
+      ${["A","B","C"].map(ax=>`
+        <div class="axisrow">
+          <div class="axislabel"><span>${ax==="A"?"回復の傾向":ax==="B"?"納得の基準":"不確実性への向き合い方"}</span></div>
+          <div style="display:flex;gap:8px;">
+            <button class="opt" style="margin:0;padding:8px 12px;font-size:13px;" onclick="sendFb('${ax}',1,this)">近い</button>
+            <button class="opt" style="margin:0;padding:8px 12px;font-size:13px;" onclick="sendFb('${ax}',0,this)">ズレている</button>
+          </div>
+        </div>`).join('')}
+    </div>
+    <button class="btn ghost" onclick="restart()">もう一度受ける(データは上書きされます)</button>
+    <p class="foot">この診断は仮説段階のツールです。すべての人に当てはまるとは限らず、断定的な性格判定ではありません。回答内容は今のところこの端末にのみ保存され、外部には送信されていません。今後、月次のフィードバックによって質問内容の精度を継続的に見直していく予定です。</p>
+  `;
+}
+
+function axisBar(label, ratio, leftLabel, rightLabel){
+  const pct = (ratio*100).toFixed(0);
+  return `<div class="axisrow">
+    <div class="axislabel"><span>${leftLabel}</span><span>${rightLabel}</span></div>
+    <div class="axistrack"><div class="axisdot" style="left:calc(${100-pct}% - 7px)"></div></div>
+  </div>`;
+}
+function axisBarC(vals){
+  const labels=["白黒つけたい","保留できる","曖昧を楽しむ"];
+  const max = Math.max(...vals); const dom = labels[vals.indexOf(max)];
+  return `<div class="axisrow">
+    <div class="axislabel"><span>不確実性への向き合い方</span><span>${dom}が優勢</span></div>
+    <div style="display:flex;gap:4px;height:8px;">
+      ${vals.map(v=>`<div style="flex:${Math.max(v,0.04)};background:var(--accent);opacity:${0.4+v*0.6};border-radius:4px;"></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function sendFb(axis, accurate, btn){
+  postJSON("/feedback", {session_id: getSessionId(), axis, accurate});
+  const row = btn.closest('.axisrow');
+  row.style.opacity = 0.5;
+  row.insertAdjacentHTML('beforeend', '<p style="font-size:12px;color:var(--sub);margin-top:4px;">記録しました</p>');
+}
+
+function restart(){
+  localStorage.removeItem(KEY);
+  state = loadState();
+  render();
+}
+
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') saveState(state); });
+window.addEventListener('pagehide', ()=> saveState(state));
+render();
+</script>
+</body>
+</html>
